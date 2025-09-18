@@ -164,7 +164,7 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold text-success">
-                        ${order.totalPrice.toFixed(2)}
+                        ${typeof order.totalPrice === "number" ? order.totalPrice.toFixed(2) : "0.00"}
                       </p>
                     </div>
                   </div>

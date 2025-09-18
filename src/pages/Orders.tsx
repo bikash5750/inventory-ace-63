@@ -371,7 +371,7 @@ export default function Orders() {
                     </TableCell>
                     <TableCell>
                       <span className="font-semibold text-success">
-                        ${order.totalPrice.toFixed(2)}
+                        ${typeof order.totalPrice === "number" ? order.totalPrice.toFixed(2) : "0.00"}
                       </span>
                     </TableCell>
                     <TableCell>

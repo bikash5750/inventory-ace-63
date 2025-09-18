@@ -22,9 +22,28 @@ api.interceptors.response.use(
   }
 );
 
+// Helper to map _id to id
+function mapProduct(product: any): Product {
+  return {
+    ...product,
+    id: product._id || product.id,
+  };
+}
+
+function mapOrder(order: any): OrderWithProducts {
+  return {
+    ...order,
+    id: order._id || order.id,
+    items: order.items.map((item: any) => ({
+      ...item,
+      productId: item.productId || (item.product && (item.product._id || item.product.id)),
+    })),
+  };
+}
+
 // Types
 export interface Product {
-  id?: string;
+  id: string;
   name: string;
   description?: string;
   price: number;
@@ -53,17 +72,35 @@ export interface OrderWithProducts extends Omit<Order, 'items'> {
 
 // Product API calls
 export const productApi = {
-  getAll: () => api.get<Product[]>('/products'),
-  getById: (id: string) => api.get<Product>(`/products/${id}`),
-  create: (product: Omit<Product, 'id'>) => api.post<Product>('/products', product),
-  update: (id: string, product: Partial<Product>) => api.put<Product>(`/products/${id}`, product),
+  getAll: async () => {
+    const res = await api.get<any[]>('/products');
+    return { ...res, data: res.data.map(mapProduct) };
+  },
+  getById: async (id: string) => {
+    const res = await api.get<any>(`/products/${id}`);
+    return { ...res, data: mapProduct(res.data) };
+  },
+  create: async (product: Omit<Product, 'id'>) => {
+    const res = await api.post<any>('/products', product);
+    return { ...res, data: mapProduct(res.data) };
+  },
+  update: async (id: string, product: Partial<Product>) => {
+    const res = await api.put<any>(`/products/${id}`, product);
+    return { ...res, data: mapProduct(res.data) };
+  },
   delete: (id: string) => api.delete(`/products/${id}`),
 };
 
 // Order API calls
 export const orderApi = {
-  getAll: () => api.get<OrderWithProducts[]>('/orders'),
-  getById: (id: string) => api.get<OrderWithProducts>(`/orders/${id}`),
+  getAll: async () => {
+    const res = await api.get<any[]>('/orders');
+    return { ...res, data: res.data.map(mapOrder) };
+  },
+  getById: async (id: string) => {
+    const res = await api.get<any>(`/orders/${id}`);
+    return { ...res, data: mapOrder(res.data) };
+  },
   create: (order: Omit<Order, 'id'>) => api.post<Order>('/orders', order),
 };
 
